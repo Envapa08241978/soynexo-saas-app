@@ -58,9 +58,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => loader.style.display = 'none', 300);
                 }, 500);
             } else {
-                console.log("No existe el documento en Firestore para este usuario");
-                // Fallback si no hay db
-                userNameEl.innerText = user.email;
+                console.log("No existe el documento. Creándolo ahora...");
+                // Crear el documento faltante con los datos iniciales
+                db.collection('users').doc(user.uid).set({
+                    name: user.displayName || user.email,
+                    email: user.email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    balanceMessages: 100,
+                    status: 'active',
+                    whatsappConnected: false
+                }).catch(err => console.error("Error creando doc:", err));
+                
+                // Fallback visual temporal mientras se crea en la base de datos
+                userNameEl.innerText = user.email || 'Usuario';
+                balanceVal.innerText = '100'; // Mostrar 100 optimísticamente
                 loader.style.display = 'none';
             }
         }, (error) => {
