@@ -172,4 +172,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Descargar Plantilla Excel
+    function downloadTemplate(e) {
+        if(e) e.preventDefault();
+        // Crear datos de ejemplo
+        const templateData = [
+            ["Nombre", "Telefono", "Etiqueta"],
+            ["Juan Perez", "5512345678", "VIP"],
+            ["Maria Garcia", "5587654321", "Colonia Centro"]
+        ];
+
+        // Crear libro de trabajo
+        const ws = XLSX.utils.aoa_to_sheet(templateData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Contactos");
+
+        // Descargar archivo
+        XLSX.writeFile(wb, "Plantilla_SoyNexo.xlsx");
+    }
+
+    const btnDownloadTemplate = document.getElementById('btn-download-template');
+    const linkDownloadTemplate = document.getElementById('link-download-template');
+    
+    if(btnDownloadTemplate) btnDownloadTemplate.addEventListener('click', downloadTemplate);
+    if(linkDownloadTemplate) linkDownloadTemplate.addEventListener('click', downloadTemplate);
+
 });
