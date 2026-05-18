@@ -1,12 +1,13 @@
 // Configuración de Firebase
 // NOTA: Reemplazar con las credenciales de Firebase Console > Project Settings
 const firebaseConfig = {
-    apiKey: "AIzaSy_PON_TUS_CREDENCIALES_AQUI",
-    authDomain: "soynexo-app.firebaseapp.com",
-    projectId: "soynexo-app",
-    storageBucket: "soynexo-app.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef123456"
+  projectId: "soy-nexo",
+  appId: "1:297456603993:web:0f64d149f8ebef16b6f248",
+  storageBucket: "soy-nexo.firebasestorage.app",
+  apiKey: "AIzaSyBOkHtoVXQ12K7P7FYNTB0nvAQW6bAKiTw",
+  authDomain: "soy-nexo.firebaseapp.com",
+  messagingSenderId: "297456603993",
+  measurementId: "G-F22YGRKTM3"
 };
 
 // Inicializar Firebase (Solo si no ha sido inicializado)
