@@ -60,14 +60,28 @@ document.addEventListener('DOMContentLoaded', () => {
         auth.signInWithPopup(googleProvider)
             .then((result) => {
                 const user = result.user;
-                // Guardar/Actualizar perfil en Firestore
-                db.collection('users').doc(user.uid).set({
+                const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
+                
+                let userData = {
                     name: user.displayName,
                     email: user.email,
                     lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'active'
-                }, { merge: true }).then(() => {
+                };
+
+                // Si es un usuario nuevo por Google, darle sus 100 mensajes
+                if (isNewUser) {
+                    userData.balanceMessages = 100;
+                    userData.whatsappConnected = false;
+                    userData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                }
+
+                // Guardar/Actualizar perfil en Firestore
+                db.collection('users').doc(user.uid).set(userData, { merge: true }).then(() => {
                     window.location.href = 'index.html';
+                }).catch((err) => {
+                    console.error("Error guardando datos:", err);
+                    showError("Error al guardar perfil.");
                 });
             })
             .catch((error) => {

@@ -31,8 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 welcomeText.innerText = `Hola, ${nombre.split(' ')[0]}`;
                 avatarEl.innerText = nombre.charAt(0).toUpperCase();
 
-                // Balance
-                balanceVal.innerText = data.balanceMessages ? data.balanceMessages.toLocaleString() : '0';
+                // Balance (Si no tiene, le damos 100 por default por el error anterior)
+                if (data.balanceMessages === undefined) {
+                    db.collection('users').doc(user.uid).update({ balanceMessages: 100 });
+                    balanceVal.innerText = '100';
+                } else {
+                    balanceVal.innerText = data.balanceMessages.toLocaleString();
+                }
 
                 // WhatsApp Status
                 if (data.whatsappConnected) {
