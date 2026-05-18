@@ -90,4 +90,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Navegación (Tabs)
+    const navInicio = document.getElementById('nav-inicio');
+    const navContactos = document.getElementById('nav-contactos');
+    const sectionInicio = document.getElementById('section-inicio');
+    const sectionContactos = document.getElementById('section-contactos');
+
+    function switchTab(tab) {
+        if (!navInicio || !navContactos) return;
+        navInicio.classList.remove('active');
+        navContactos.classList.remove('active');
+        sectionInicio.style.display = 'none';
+        sectionContactos.style.display = 'none';
+
+        if (tab === 'inicio') {
+            navInicio.classList.add('active');
+            sectionInicio.style.display = 'block';
+        } else if (tab === 'contactos') {
+            navContactos.classList.add('active');
+            sectionContactos.style.display = 'block';
+        }
+    }
+
+    if (navInicio) navInicio.addEventListener('click', (e) => { e.preventDefault(); switchTab('inicio'); });
+    if (navContactos) navContactos.addEventListener('click', (e) => { e.preventDefault(); switchTab('contactos'); });
+
 });

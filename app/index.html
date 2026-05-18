@@ -190,15 +190,15 @@
             SOY NEXO
         </a>
         <ul class="nav-menu">
-            <li class="nav-item"><a href="#" class="nav-link active">
+            <li class="nav-item"><a href="#" class="nav-link active" id="nav-inicio">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 Inicio
             </a></li>
-            <li class="nav-item"><a href="#" class="nav-link">
+            <li class="nav-item"><a href="#" class="nav-link" id="nav-contactos">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 Contactos / Votantes
             </a></li>
-            <li class="nav-item"><a href="#" class="nav-link">
+            <li class="nav-item"><a href="#" class="nav-link" id="nav-campanas">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 Campañas
             </a></li>
@@ -218,13 +218,16 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <header class="header">
-            <div>
-                <h1 id="welcome-text">Hola, ...</h1>
-                <p style="color: var(--text-secondary); margin-top: 4px;">Este es tu resumen operativo de hoy.</p>
-            </div>
-            
-            <div class="whatsapp-status" id="wa-status-banner">
+        
+        <!-- SECTION: INICIO -->
+        <div id="section-inicio" class="view-section active">
+            <header class="header">
+                <div>
+                    <h1 id="welcome-text">Hola, ...</h1>
+                    <p style="color: var(--text-secondary); margin-top: 4px;">Este es tu resumen operativo de hoy.</p>
+                </div>
+                
+                <div class="whatsapp-status" id="wa-status-banner">
                 <div class="status-dot"></div>
                 <div>
                     <strong style="display: block; font-size: 0.85rem;">WhatsApp Desconectado</strong>
@@ -250,15 +253,60 @@
             </div>
         </div>
 
-        <div class="section-panel">
-            <h2>Campañas Recientes <button class="btn btn-primary btn-sm">+ Nueva Campaña</button></h2>
-            <div class="empty-state">
-                <div class="empty-icon">📊</div>
-                <h3>No hay campañas activas</h3>
-                <p>Conecta tu número de WhatsApp para empezar a enviar mensajes masivos a tus votantes o clientes.</p>
+            <div class="section-panel">
+                <h2>Campañas Recientes <button class="btn btn-primary btn-sm">+ Nueva Campaña</button></h2>
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <h3>No hay campañas activas</h3>
+                    <p>Conecta tu número de WhatsApp para empezar a enviar mensajes masivos a tus votantes o clientes.</p>
+                </div>
             </div>
-        </div>
+        </div> <!-- End Section Inicio -->
+
+        <!-- SECTION: CONTACTOS -->
+        <div id="section-contactos" class="view-section" style="display: none;">
+            <header class="header">
+                <div>
+                    <h1>Contactos en Base</h1>
+                    <p style="color: var(--text-secondary); margin-top: 4px;">Gestiona tu lista de votantes o clientes.</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-ghost btn-sm" id="btn-delete-all" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3); display: none;">Vaciar Base</button>
+                    <label class="btn btn-primary btn-sm" style="cursor: pointer;">
+                        Importar Excel/CSV
+                        <input type="file" id="file-import" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
+                    </label>
+                </div>
+            </header>
+
+            <div class="section-panel" style="padding: 0; overflow: hidden;">
+                <div id="contacts-empty" class="empty-state" style="padding: 60px 20px;">
+                    <div class="empty-icon">👥</div>
+                    <h3>Tu base de datos está vacía</h3>
+                    <p>Sube un archivo de Excel para empezar a organizar tu audiencia.</p>
+                </div>
+                
+                <div id="contacts-table-container" style="display: none; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border-color);">
+                            <tr>
+                                <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Nombre</th>
+                                <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Teléfono</th>
+                                <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Etiqueta / Colonia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contacts-list">
+                            <!-- Rows dinámicos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div> <!-- End Section Contactos -->
+
     </main>
+
+    <!-- Excel Parser Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -267,5 +315,6 @@
     
     <script src="firebase-config.js"></script>
     <script src="dashboard.js"></script>
+    <script src="contacts.js"></script>
 </body>
 </html>
