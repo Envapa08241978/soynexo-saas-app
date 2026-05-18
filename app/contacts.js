@@ -172,23 +172,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Descargar Plantilla Excel
+    // Descargar Plantilla CSV
     function downloadTemplate(e) {
         if(e) e.preventDefault();
-        // Crear datos de ejemplo
-        const templateData = [
-            ["Nombre", "Telefono", "Etiqueta"],
-            ["Juan Perez", "5512345678", "VIP"],
-            ["Maria Garcia", "5587654321", "Colonia Centro"]
-        ];
-
-        // Crear libro de trabajo
-        const ws = XLSX.utils.aoa_to_sheet(templateData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Contactos");
-
-        // Descargar archivo
-        XLSX.writeFile(wb, "Plantilla_SoyNexo.xlsx");
+        
+        // Crear contenido CSV (con BOM para que Excel lea acentos correctamente)
+        const csvContent = "Nombre,Telefono,Etiqueta\nJuan Perez,5512345678,VIP\nMaría García,5587654321,Colonia Centro";
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        
+        // Crear enlace de descarga nativo
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.setAttribute('download', 'Plantilla_SoyNexo.csv');
+        document.body.appendChild(a);
+        a.click();
+        
+        // Limpiar
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     const btnDownloadTemplate = document.getElementById('btn-download-template');
