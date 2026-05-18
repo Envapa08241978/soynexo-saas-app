@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Soy Nexo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        body {
+            background: var(--bg-secondary);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+        .sidebar-brand .logo-icon { font-size: 1.4rem; }
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+        .nav-item {
+            margin-bottom: 8px;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .nav-link:hover {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+        }
+        .nav-link.active {
+            background: var(--gradient-subtle);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6,182,212,0.2);
+        }
+        .nav-icon { width: 20px; height: 20px; }
+        
+        .user-profile {
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .user-info { flex: 1; overflow: hidden; }
+        .user-name { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-logout { font-size: 0.75rem; color: #ef4444; cursor: pointer; text-decoration: none; }
+        .user-logout:hover { text-decoration: underline; }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .header h1 { font-size: 1.8rem; font-weight: 800; }
+        
+        .whatsapp-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            color: #fca5a5;
+        }
+        .whatsapp-status.connected {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+        .status-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #ef4444;
+        }
+        .whatsapp-status.connected .status-dot { background: #22c55e; }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .dash-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .dash-card h3 { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px; font-weight: 500;}
+        .dash-card .value { font-size: 2.2rem; font-weight: 800; color: var(--text-primary); }
+        .dash-card.highlight { border-color: rgba(6,182,212,0.4); box-shadow: var(--shadow-glow); }
+        .dash-card.highlight .value { background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .btn-sm { padding: 8px 16px; font-size: 0.85rem; }
+
+        .section-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        .section-panel h2 { font-size: 1.2rem; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+
+        /* Loader */
+        #loader {
+            position: fixed; inset: 0; background: var(--bg-primary);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loader"><div class="spinner"></div></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="#" class="sidebar-brand">
+            <span class="logo-icon">⬡</span>
+            SOY NEXO
+        </a>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="#" class="nav-link active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Inicio
+            </a></li>
+            <li class="nav-item"><a href="#" class="nav-link">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Contactos / Votantes
+            </a></li>
+            <li class="nav-item"><a href="#" class="nav-link">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Campañas
+            </a></li>
+            <li class="nav-item"><a href="#" class="nav-link">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Recargar Saldo
+            </a></li>
+        </ul>
+        <div class="user-profile">
+            <div class="user-avatar" id="user-avatar">?</div>
+            <div class="user-info">
+                <div class="user-name" id="user-name">Cargando...</div>
+                <a href="#" class="user-logout" id="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="header">
+            <div>
+                <h1 id="welcome-text">Hola, ...</h1>
+                <p style="color: var(--text-secondary); margin-top: 4px;">Este es tu resumen operativo de hoy.</p>
+            </div>
+            
+            <div class="whatsapp-status" id="wa-status-banner">
+                <div class="status-dot"></div>
+                <div>
+                    <strong style="display: block; font-size: 0.85rem;">WhatsApp Desconectado</strong>
+                    <span style="font-size: 0.75rem;">Requiere Embedded Signup</span>
+                </div>
+                <button class="btn btn-primary btn-sm" style="margin-left: 10px;">Conectar WhatsApp</button>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="dash-card highlight">
+                <h3>Mensajes Disponibles</h3>
+                <div class="value" id="balance-val">0</div>
+                <a href="#" style="color: var(--accent-cyan); font-size: 0.8rem; margin-top: 10px; display: inline-block;">Comprar más saldo →</a>
+            </div>
+            <div class="dash-card">
+                <h3>Enviados (Este mes)</h3>
+                <div class="value">0</div>
+            </div>
+            <div class="dash-card">
+                <h3>Contactos en Base</h3>
+                <div class="value">0</div>
+            </div>
+        </div>
+
+        <div class="section-panel">
+            <h2>Campañas Recientes <button class="btn btn-primary btn-sm">+ Nueva Campaña</button></h2>
+            <div class="empty-state">
+                <div class="empty-icon">📊</div>
+                <h3>No hay campañas activas</h3>
+                <p>Conecta tu número de WhatsApp para empezar a enviar mensajes masivos a tus votantes o clientes.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
