@@ -20,14 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Lanzar FB Login con configuración de WhatsApp (Tech Provider)
             FB.login((response) => {
                 if (response.authResponse) {
-                    const accessToken = response.authResponse.accessToken;
-                    console.log('Login exitoso. Token obtenido.');
+                    const code = response.authResponse.code;
+                    console.log('Login exitoso. Code obtenido:', code);
                     
-                    // Aquí es donde normalmente enviaríamos el accessToken a nuestro backend
+                    // Aquí es donde normalmente enviaríamos el code a nuestro backend
                     // para intercambiarlo por un token de sistema y obtener los WABA_ID.
                     // En este punto, simularemos guardar la conexión exitosa en Firestore.
                     
-                    guardarConexionEnFirestore(accessToken);
+                    guardarConexionEnFirestore(code);
                     
                 } else {
                     console.log('El usuario canceló el inicio de sesión o no lo autorizó por completo.');
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function guardarConexionEnFirestore(accessToken) {
+    function guardarConexionEnFirestore(code) {
         const user = auth.currentUser;
         if (!user) return;
 
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             whatsappNumber: '5512345678', // Esto debería venir de la API de Meta
             wabaId: 'MOCK_WABA_ID',
             phoneNumberId: 'MOCK_PHONE_ID',
-            metaAccessToken: accessToken,
+            metaAuthCode: code,
             connectedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
