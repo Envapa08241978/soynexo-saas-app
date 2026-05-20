@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <base href="/app/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Soy Nexo</title>
@@ -202,6 +203,10 @@
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 Campañas
             </a></li>
+            <li class="nav-item"><a href="#" class="nav-link" id="nav-plantillas">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                Mis Plantillas
+            </a></li>
             <li class="nav-item"><a href="#" class="nav-link">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 Recargar Saldo
@@ -233,7 +238,7 @@
                     <strong style="display: block; font-size: 0.85rem;">WhatsApp Desconectado</strong>
                     <span style="font-size: 0.75rem;">Requiere Embedded Signup</span>
                 </div>
-                <button class="btn btn-primary btn-sm" style="margin-left: 10px;">Conectar WhatsApp</button>
+                <button class="btn btn-primary btn-sm" style="margin-left: 10px;" id="btn-connect-wa">Conectar WhatsApp</button>
             </div>
         </header>
 
@@ -305,6 +310,208 @@
             </div>
         </div> <!-- End Section Contactos -->
 
+        <!-- SECTION: CAMPANAS -->
+        <div id="section-campanas" class="view-section" style="display: none;">
+            <header class="header">
+                <div>
+                    <h1>Campañas de WhatsApp</h1>
+                    <p style="color: var(--text-secondary); margin-top: 4px;">Envía mensajes masivos a tus audiencias.</p>
+                </div>
+                <button class="btn btn-primary btn-sm" id="btn-new-campaign">+ Nueva Campaña</button>
+            </header>
+
+            <div class="section-panel" id="campaigns-list-panel">
+                <h2>Historial de Campañas</h2>
+                <div id="campaigns-empty" class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <h3>No hay campañas activas</h3>
+                    <p>Crea tu primera campaña para empezar a enviar mensajes.</p>
+                </div>
+                <div id="campaigns-table-container" style="display: none; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border-color);">
+                            <tr>
+                                <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Nombre</th>
+                                <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Audiencia</th>
+                                <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Plantilla</th>
+                                <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="campaigns-list">
+                            <!-- Rows dinámicos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Panel de Nueva Campaña (Oculto por defecto) -->
+            <div class="section-panel" id="new-campaign-panel" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2>Crear Nueva Campaña</h2>
+                    <button class="btn btn-ghost btn-sm" id="btn-cancel-campaign">Cancelar</button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 300px; gap: 40px;">
+                    
+                    <!-- Formulario de Configuración -->
+                    <div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Nombre de la Campaña</label>
+                            <input type="text" id="campaign-name" placeholder="Ej. Invitación Mitin Centro" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary);">
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Audiencia (Etiquetas)</label>
+                            <select id="campaign-audience" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary);">
+                                <option value="all">Todos los contactos (0)</option>
+                                <!-- Opciones dinámicas de etiquetas -->
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Plantilla de Meta (Pre-aprobada)</label>
+                            <select id="campaign-template" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary);">
+                                <option value="" disabled selected>Selecciona una plantilla...</option>
+                                <!-- Plantillas cargadas dinámicamente -->
+                            </select>
+                        </div>
+
+                        <div style="margin-top: 32px; padding: 20px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px;">
+                            <h4 style="margin-bottom: 10px; color: var(--accent-blue);">Resumen de Envío</h4>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <span style="color: var(--text-secondary);">Contactos destino:</span>
+                                <strong id="summary-count">0</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                                <span style="color: var(--text-secondary);">Costo en saldo:</span>
+                                <strong id="summary-cost" style="color: #ef4444;">-0 mensajes</strong>
+                            </div>
+                            <button class="btn btn-primary btn-full" id="btn-send-campaign" disabled>Enviar Campaña</button>
+                        </div>
+                    </div>
+
+                    <!-- Previsualización Visual (Celular Mockup) -->
+                    <div>
+                        <label style="display: block; margin-bottom: 16px; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-align: center;">Vista Previa WhatsApp</label>
+                        <div style="width: 100%; background: #1a1a2e; border-radius: 36px; padding: 12px; box-shadow: var(--shadow-glow); border: 1px solid rgba(255,255,255,0.1); position: relative; margin: 0 auto;">
+                            <div style="width: 100px; height: 20px; background: #0a1628; border-radius: 0 0 12px 12px; margin: 0 auto 8px;"></div>
+                            <div style="background: #111827; border-radius: 24px; overflow: hidden; min-height: 350px; display: flex; flex-direction: column;">
+                                <div style="padding: 10px; background: #1e293b; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--gradient-main);"></div>
+                                    <span style="font-size: 0.8rem; font-weight: 600;">Tu Negocio</span>
+                                </div>
+                                <div style="padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 20px 20px;">
+                                    
+                                    <div id="preview-msg-container" style="background: #1e293b; padding: 12px; border-radius: 12px; border-top-left-radius: 2px; font-size: 0.8rem; line-height: 1.5; color: #e2e8f0; display: none;">
+                                        <img id="preview-image" style="width: 100%; border-radius: 8px; margin-bottom: 8px; display: none; max-height: 150px; object-fit: cover;" src="" alt="Preview">
+                                        <p id="preview-text">Selecciona una plantilla para previsualizar.</p>
+                                        <div id="preview-link" style="margin-top: 8px; color: var(--accent-cyan); text-decoration: underline;">Enlace de acción</div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div> <!-- End Section Campanas -->
+
+        <!-- SECTION: PLANTILLAS -->
+        <div id="section-plantillas" class="view-section" style="display: none;">
+            <header class="header">
+                <div>
+                    <h1>Mis Plantillas</h1>
+                    <p style="color: var(--text-secondary); margin-top: 4px;">Crea y administra tus mensajes pre-aprobados.</p>
+                </div>
+                <button class="btn btn-primary btn-sm" id="btn-new-template">+ Crear Plantilla</button>
+            </header>
+
+            <div class="section-panel" id="templates-list-panel">
+                <div id="templates-empty" class="empty-state">
+                    <div class="empty-icon">📝</div>
+                    <h3>Aún no tienes plantillas</h3>
+                    <p>Crea tu primer mensaje. Te sugerimos crear plantillas de:</p>
+                    <ul style="list-style: none; padding: 0; color: var(--accent-cyan); margin-top: 10px; display: flex; justify-content: center; gap: 20px;">
+                        <li>• Informe de Gobierno</li>
+                        <li>• Invitación a Evento</li>
+                        <li>• Promoción / Aviso</li>
+                    </ul>
+                </div>
+                
+                <!-- Grid de plantillas creadas -->
+                <div id="templates-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; display: none;">
+                    <!-- Las tarjetas de plantillas irán aquí -->
+                </div>
+            </div>
+
+            <!-- Panel Crear Plantilla -->
+            <div class="section-panel" id="new-template-panel" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2>Nueva Plantilla</h2>
+                    <button class="btn btn-ghost btn-sm" id="btn-cancel-template">Cancelar</button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 300px; gap: 40px;">
+                    <div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600;">Nombre de la plantilla</label>
+                            <input type="text" id="tpl-name" placeholder="Ej. Invitacion Evento" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary);">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600;">Imagen / Fotografía (Opcional)</label>
+                            <input type="file" id="tpl-image" accept="image/*" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary);">
+                            <small style="color: var(--text-muted); display: block; margin-top: 4px;">Máximo 2MB. Formatos: JPG, PNG.</small>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600;">Texto del mensaje</label>
+                            <textarea id="tpl-text" rows="5" placeholder="Hola {{nombre}}, estás invitado a..." style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary); resize: vertical;"></textarea>
+                            <small style="color: var(--text-muted); display: block; margin-top: 4px;">Usa {{nombre}} para que se reemplace por el nombre del contacto.</small>
+                        </div>
+
+                        <div style="margin-bottom: 20px; display: flex; gap: 20px;">
+                            <div style="flex: 1;">
+                                <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600;">Texto del Botón</label>
+                                <input type="text" id="tpl-btn-text" placeholder="Ej. Confirmar Asistencia" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary);">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600;">Enlace del Botón (URL)</label>
+                                <input type="url" id="tpl-btn-url" placeholder="https://..." style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary);">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" id="btn-save-template">Guardar Plantilla</button>
+                    </div>
+
+                    <!-- Previsualización Visual (Celular Mockup) -->
+                    <div>
+                        <label style="display: block; margin-bottom: 16px; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-align: center;">Vista Previa</label>
+                        <div style="width: 100%; background: #1a1a2e; border-radius: 36px; padding: 12px; box-shadow: var(--shadow-glow); border: 1px solid rgba(255,255,255,0.1); position: relative; margin: 0 auto;">
+                            <div style="width: 100px; height: 20px; background: #0a1628; border-radius: 0 0 12px 12px; margin: 0 auto 8px;"></div>
+                            <div style="background: #111827; border-radius: 24px; overflow: hidden; min-height: 350px; display: flex; flex-direction: column;">
+                                <div style="padding: 10px; background: #1e293b; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--gradient-main);"></div>
+                                    <span style="font-size: 0.8rem; font-weight: 600;">Tu Negocio</span>
+                                </div>
+                                <div style="padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 20px 20px;">
+                                    
+                                    <div id="tpl-preview-container" style="background: #1e293b; padding: 12px; border-radius: 12px; border-top-left-radius: 2px; font-size: 0.8rem; line-height: 1.5; color: #e2e8f0;">
+                                        <img id="tpl-preview-img" style="width: 100%; border-radius: 8px; margin-bottom: 8px; display: none; max-height: 150px; object-fit: cover;">
+                                        <p id="tpl-preview-text">Escribe tu mensaje...</p>
+                                        <div id="tpl-preview-btn" style="margin-top: 8px; color: var(--accent-cyan); text-decoration: underline; display: none;"></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- End Section Plantillas -->
+
     </main>
 
     <!-- Excel Parser Library -->
@@ -314,9 +521,16 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     
     <script src="firebase-config.js"></script>
     <script src="dashboard.js"></script>
     <script src="contacts.js"></script>
+    <script src="campaigns.js"></script>
+    <script src="templates.js"></script>
+    <script src="whatsapp-auth.js"></script>
+
+    <!-- Facebook SDK for Embedded Signup -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/es_LA/sdk.js"></script>
 </body>
 </html>

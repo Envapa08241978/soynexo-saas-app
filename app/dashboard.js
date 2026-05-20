@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <strong style="display: block; font-size: 0.85rem;">WhatsApp Conectado</strong>
                             <span style="font-size: 0.75rem;">+52 ${data.whatsappNumber || '***'}</span>
                         </div>
-                        <button class="btn btn-ghost btn-sm" style="margin-left: 10px; border-color: rgba(34,197,94,0.3); color:#86efac;">Configurar</button>
+                        <button class="btn btn-ghost btn-sm" id="btn-config-wa" style="margin-left: 10px; border-color: rgba(34,197,94,0.3); color:#86efac;">Configurar</button>
                     `;
                 }
 
@@ -93,15 +93,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navegación (Tabs)
     const navInicio = document.getElementById('nav-inicio');
     const navContactos = document.getElementById('nav-contactos');
+    const navCampanas = document.getElementById('nav-campanas');
+    const navPlantillas = document.getElementById('nav-plantillas');
+    
     const sectionInicio = document.getElementById('section-inicio');
     const sectionContactos = document.getElementById('section-contactos');
+    const sectionCampanas = document.getElementById('section-campanas');
+    const sectionPlantillas = document.getElementById('section-plantillas');
 
     function switchTab(tab) {
-        if (!navInicio || !navContactos) return;
+        if (!navInicio || !navContactos || !navCampanas || !navPlantillas) return;
         navInicio.classList.remove('active');
         navContactos.classList.remove('active');
+        navCampanas.classList.remove('active');
+        navPlantillas.classList.remove('active');
+        
         sectionInicio.style.display = 'none';
         sectionContactos.style.display = 'none';
+        if(sectionCampanas) sectionCampanas.style.display = 'none';
+        if(sectionPlantillas) sectionPlantillas.style.display = 'none';
 
         if (tab === 'inicio') {
             navInicio.classList.add('active');
@@ -109,10 +119,24 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (tab === 'contactos') {
             navContactos.classList.add('active');
             sectionContactos.style.display = 'block';
+        } else if (tab === 'campanas') {
+            navCampanas.classList.add('active');
+            if(sectionCampanas) sectionCampanas.style.display = 'block';
+            
+            // Notificar que se abrió la pestaña (para cargar campañas)
+            window.dispatchEvent(new Event('campanas-tab-active'));
+        } else if (tab === 'plantillas') {
+            navPlantillas.classList.add('active');
+            if(sectionPlantillas) sectionPlantillas.style.display = 'block';
+            
+            // Notificar que se abrió la pestaña (para cargar plantillas si es necesario)
+            window.dispatchEvent(new Event('plantillas-tab-active'));
         }
     }
 
     if (navInicio) navInicio.addEventListener('click', (e) => { e.preventDefault(); switchTab('inicio'); });
     if (navContactos) navContactos.addEventListener('click', (e) => { e.preventDefault(); switchTab('contactos'); });
+    if (navCampanas) navCampanas.addEventListener('click', (e) => { e.preventDefault(); switchTab('campanas'); });
+    if (navPlantillas) navPlantillas.addEventListener('click', (e) => { e.preventDefault(); switchTab('plantillas'); });
 
 });
