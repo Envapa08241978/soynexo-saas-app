@@ -45,28 +45,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function guardarConexionEnFirestore(code) {
+    async function guardarConexionEnFirestore(code) {
         const user = auth.currentUser;
         if (!user) return;
 
-        // Simulamos obtener el número y los IDs después del Embedded Signup
-        const wabaData = {
-            whatsappConnected: true,
-            whatsappNumber: '5512345678', // Esto debería venir de la API de Meta
-            wabaId: 'MOCK_WABA_ID',
-            phoneNumberId: 'MOCK_PHONE_ID',
-            metaAuthCode: code,
-            connectedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        db.collection('users').doc(user.uid).update(wabaData)
-            .then(() => {
-                console.log("Datos de WhatsApp guardados en Firestore correctamente.");
-                alert("¡WhatsApp conectado con éxito!");
-            })
-            .catch((error) => {
-                console.error("Error al guardar en Firestore:", error);
-                alert("Error al conectar. Revisa la consola.");
+        console.log("Enviando código al backend de Vercel...");
+        
+        try {
+            // Llamamos a la API Serverless de Vercel
+            const response = await fetch('/api/exchangeMetaCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: code })
             });
+            
+            const result = await response.json();
+            
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || "Error desconocido en el servidor");
+            }
+            
+            console.log("Token obtenido exitosamente:", result);
+            
+            // Guardamos los datos en Firestore desde el cliente
+            const wabaData = {
+                whatsappConnected: true,
+                metaSystemToken: result.accessToken,
+                wabaId: result.wabaId || 'No disponible',
+                connectedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            await db.collection('users').doc(user.uid).update(wabaData);
+            
+            console.log("Datos guardados en Firestore correctamente.");
+            alert("¡WhatsApp conectado con éxito!");
+            
+        } catch (error) {
+            console.error("Error al intercambiar código con Meta:", error);
+            alert("Hubo un error al conectar WhatsApp. Revisa la consola.");
+        }
     }
 });
