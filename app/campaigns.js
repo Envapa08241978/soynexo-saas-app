@@ -270,9 +270,13 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSend.innerText = `Enviando 0 / ${count}...`;
 
         const campaignName = nameInput.value.trim();
-        // Usar el nombre de la plantilla Meta aprobada
-        // Por defecto usamos 'campana_general' — en el futuro se puede hacer seleccionable
-        const metaTemplateName = 'campana_general';
+        // Usamos la nueva plantilla flexible de Meta
+        const metaTemplateName = 'campana_flexible';
+
+        // Obtener el contenido de la plantilla creada por el usuario
+        const selectedTpl = userTemplates.find(t => t.id === templateSelect.value);
+        const businessName = selectedTpl ? selectedTpl.name : 'Mi Negocio';
+        const bodyText = selectedTpl ? selectedTpl.text : 'Tenemos un mensaje para ti.';
 
         try {
             // 1. Llamar a la API de envío real
@@ -283,7 +287,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     phoneNumberId: userWhatsAppConfig.phoneNumberId,
                     accessToken: userWhatsAppConfig.metaSystemToken,
                     contacts: contactsToSend,
-                    templateName: metaTemplateName
+                    templateName: metaTemplateName,
+                    templateVariables: {
+                        businessName: businessName,
+                        bodyText: bodyText
+                    }
                 })
             });
 

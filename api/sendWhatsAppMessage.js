@@ -41,6 +41,19 @@ export default async function handler(req, res) {
 
       const contactName = contact.name || contact.nombre || 'amigo';
 
+      let parameters = [];
+      if (templateName === 'campana_flexible') {
+        parameters = [
+          { type: 'text', text: contactName }, // {{1}} = nombre del contacto
+          { type: 'text', text: req.body.templateVariables?.businessName || 'Mi Negocio' }, // {{2}} = nombre del negocio/plantilla
+          { type: 'text', text: req.body.templateVariables?.bodyText || 'Mensaje importante' } // {{3}} = cuerpo del mensaje
+        ];
+      } else {
+        parameters = [
+          { type: 'text', text: contactName } // fallback para otras plantillas
+        ];
+      }
+
       const messageBody = {
         messaging_product: 'whatsapp',
         to: phone,
@@ -51,9 +64,7 @@ export default async function handler(req, res) {
           components: [
             {
               type: 'body',
-              parameters: [
-                { type: 'text', text: contactName } // {{1}} = nombre del contacto
-              ]
+              parameters: parameters
             }
           ]
         }
