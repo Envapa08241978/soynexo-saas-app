@@ -24,16 +24,32 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUser = null;
     let allContacts = [];
     let currentBalance = 0;
-    
     let userTemplates = [];
+    let userWhatsAppConfig = null; // { phoneNumberId, metaSystemToken, whatsappConnected }
 
     auth.onAuthStateChanged((user) => {
         if (user) {
             currentUser = user;
             loadCampaigns();
             listenToBalance();
+            loadWhatsAppConfig();
         }
     });
+
+    // Cargar configuración de WhatsApp del usuario
+    function loadWhatsAppConfig() {
+        db.collection('users').doc(currentUser.uid).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                userWhatsAppConfig = {
+                    whatsappConnected: data.whatsappConnected || false,
+                    phoneNumberId: data.phoneNumberId || null,
+                    metaSystemToken: data.metaSystemToken || null,
+                    wabaId: data.wabaId || null
+                };
+            }
+        });
+    }
 
     // Escuchar cuando la pestaña de campañas se activa
     window.addEventListener('campanas-tab-active', () => {
@@ -222,56 +238,111 @@ document.addEventListener('DOMContentLoaded', () => {
         if(currentUser) loadContactsForAudience();
     }
 
-    btnSend.addEventListener('click', () => {
-        if(btnSend.disabled) return;
-        
+    btnSend.addEventListener('click', async () => {
+        if (btnSend.disabled) return;
+
+        // Verificar que WhatsApp esté conectado
+        if (!userWhatsAppConfig || !userWhatsAppConfig.whatsappConnected) {
+            alert('⚠️ Tu WhatsApp no está conectado. Ve al Dashboard y conecta tu número primero.');
+            return;
+        }
+
+        if (!userWhatsAppConfig.phoneNumberId || !userWhatsAppConfig.metaSystemToken) {
+            alert('⚠️ Falta configuración de WhatsApp (phoneNumberId o token). Reconecta tu número.');
+            return;
+        }
+
         const selectedAudience = audienceSelect.value;
-        let count = selectedAudience === 'all' ? allContacts.length : allContacts.filter(c => c.etiqueta === selectedAudience).length;
-        
+        const contactsToSend = selectedAudience === 'all'
+            ? allContacts
+            : allContacts.filter(c => c.etiqueta === selectedAudience);
+        const count = contactsToSend.length;
+
+        if (count === 0) {
+            alert('No hay contactos en la audiencia seleccionada.');
+            return;
+        }
+
+        const confirmed = confirm(`¿Enviar campaña a ${count} contactos?\n\nSe descontarán ${count} mensajes de tu saldo.`);
+        if (!confirmed) return;
+
         btnSend.disabled = true;
-        btnSend.innerText = 'Enviando...';
-        
-        const campaignData = {
-            name: nameInput.value.trim(),
-            audience: selectedAudience,
-            template: templateSelect.value,
-            count: count,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'sent'
-        };
+        btnSend.innerText = `Enviando 0 / ${count}...`;
 
-        const userRef = db.collection('users').doc(currentUser.uid);
-        
-        // Transaction to deduct balance and create campaign
-        db.runTransaction((transaction) => {
-            return transaction.get(userRef).then((userDoc) => {
-                if (!userDoc.exists) {
-                    throw "Usuario no existe!";
-                }
+        const campaignName = nameInput.value.trim();
+        // Usar el nombre de la plantilla Meta aprobada
+        // Por defecto usamos 'campana_general' — en el futuro se puede hacer seleccionable
+        const metaTemplateName = 'campana_general';
 
-                const newBalance = (userDoc.data().balanceMessages || 0) - count;
-                if (newBalance < 0) {
-                    throw "Saldo insuficiente.";
-                }
+        try {
+            // 1. Llamar a la API de envío real
+            const sendResponse = await fetch('/api/sendWhatsAppMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phoneNumberId: userWhatsAppConfig.phoneNumberId,
+                    accessToken: userWhatsAppConfig.metaSystemToken,
+                    contacts: contactsToSend,
+                    templateName: metaTemplateName
+                })
+            });
+
+            const sendResult = await sendResponse.json();
+            console.log('Resultado envío:', sendResult);
+
+            const sentCount = sendResult.sent || 0;
+            const failedCount = sendResult.failed || 0;
+
+            // 2. Descontar del saldo solo los mensajes enviados exitosamente
+            const userRef = db.collection('users').doc(currentUser.uid);
+            await db.runTransaction(async (transaction) => {
+                const userDoc = await transaction.get(userRef);
+                if (!userDoc.exists) throw 'Usuario no existe';
+
+                const currentBal = userDoc.data().balanceMessages || 0;
+                const newBalance = currentBal - sentCount;
+                if (newBalance < 0) throw 'Saldo insuficiente';
 
                 transaction.update(userRef, { balanceMessages: newBalance });
-                
+
                 const campaignRef = userRef.collection('campaigns').doc();
-                transaction.set(campaignRef, campaignData);
+                transaction.set(campaignRef, {
+                    name: campaignName,
+                    audience: selectedAudience,
+                    template: metaTemplateName,
+                    count: sentCount,
+                    failed: failedCount,
+                    totalTargeted: count,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: sentCount > 0 ? 'sent' : 'failed'
+                });
             });
-        }).then(() => {
-            // Success
-            alert('¡Campaña enviada con éxito! (Simulación)');
+
+            // 3. Mostrar resultado
+            let mensaje = `✅ Campaña "${campaignName}" completada:\n\n`;
+            mensaje += `📤 Enviados: ${sentCount}\n`;
+            if (failedCount > 0) {
+                mensaje += `❌ Fallidos: ${failedCount}\n`;
+                if (sendResult.errors && sendResult.errors.length > 0) {
+                    mensaje += `\nPrimeros errores:\n`;
+                    sendResult.errors.slice(0, 3).forEach(e => {
+                        mensaje += `• ${e.contact}: ${e.reason}\n`;
+                    });
+                }
+            }
+
+            alert(mensaje);
             btnSend.innerText = 'Enviar Campaña';
             newPanel.style.display = 'none';
             listPanel.style.display = 'block';
             resetForm();
-        }).catch((err) => {
-            console.error(err);
-            alert('Error al enviar la campaña: ' + err);
+
+        } catch (err) {
+            console.error('Error al enviar campaña:', err);
+            alert('❌ Error al enviar la campaña: ' + err);
             btnSend.disabled = false;
             btnSend.innerText = 'Enviar Campaña';
-        });
+        }
     });
 
 });
