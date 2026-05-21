@@ -4,7 +4,9 @@
     <base href="/app/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Soy Nexo</title>
+    <title>Panel | Soy Nexo</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="apple-touch-icon" href="/logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles.css">
     <style>
@@ -177,6 +179,17 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Modal Styles */
+        .modal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+            z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
@@ -187,7 +200,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <a href="#" class="sidebar-brand">
-            <span class="logo-icon">⬡</span>
+            <img src="/logo.png" alt="Soy Nexo" style="height: 32px; width: 32px; border-radius: 7px; object-fit: cover;">
             SOY NEXO
         </a>
         <ul class="nav-menu">
@@ -207,7 +220,7 @@
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
                 Mis Plantillas
             </a></li>
-            <li class="nav-item"><a href="#" class="nav-link">
+            <li class="nav-item"><a href="#" class="nav-link" id="nav-recargar">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 Recargar Saldo
             </a></li>
@@ -278,6 +291,7 @@
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-ghost btn-sm" id="btn-download-template" style="color: var(--accent-cyan); border-color: rgba(6,182,212,0.3);">⬇️ Descargar Plantilla</button>
                     <button class="btn btn-ghost btn-sm" id="btn-delete-all" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3); display: none;">Vaciar Base</button>
+                    <button class="btn btn-primary btn-sm" id="btn-add-contact">➕ Nuevo Contacto</button>
                     <label class="btn btn-primary btn-sm" style="cursor: pointer;">
                         Importar Excel/CSV
                         <input type="file" id="file-import" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
@@ -300,6 +314,7 @@
                                 <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Nombre</th>
                                 <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Teléfono</th>
                                 <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Etiqueta / Colonia</th>
+                                <th style="padding: 16px; font-weight: 600; color: var(--text-secondary); text-align: right;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="contacts-list">
@@ -512,7 +527,77 @@
             </div>
         </div> <!-- End Section Plantillas -->
 
+        <!-- SECTION: RECARGAR SALDO -->
+        <div id="section-recargar" class="view-section" style="display: none;">
+            <header class="header">
+                <div>
+                    <h1>Recargar Saldo</h1>
+                    <p style="color: var(--text-secondary); margin-top: 4px;">Compra paquetes de mensajes para tus campañas de WhatsApp.</p>
+                </div>
+            </header>
+
+            <!-- Paquetes Fijos -->
+            <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 20px;">
+                <!-- Paquete Básico -->
+                <div class="dash-card" style="text-align: center;">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 15px; color: var(--text-primary);">Paquete Básico</h3>
+                    <div class="value" style="font-size: 2.5rem; color: var(--accent-cyan);">1,000</div>
+                    <p style="color: var(--text-secondary); margin-bottom: 5px;">Mensajes de WhatsApp</p>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 20px;">$1.20 por mensaje</p>
+                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 25px;">$1,200 <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);">MXN</span></div>
+                    <button class="btn btn-primary btn-full btn-buy-package" data-package="basic" data-price="120000" data-messages="1000">Comprar Ahora</button>
+                </div>
+
+                <!-- Paquete Plus -->
+                <div class="dash-card highlight" style="text-align: center; border-color: var(--accent-blue); transform: scale(1.05); z-index: 10; position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: -10px; right: -30px; background: var(--accent-blue); color: white; padding: 5px 30px; transform: rotate(45deg); font-size: 0.75rem; font-weight: bold;">POPULAR</div>
+                    <h3 style="font-size: 1.2rem; margin-bottom: 15px; color: var(--text-primary);">Paquete Plus</h3>
+                    <div class="value" style="font-size: 2.5rem; color: var(--accent-blue);">5,000</div>
+                    <p style="color: var(--text-secondary); margin-bottom: 5px;">Mensajes de WhatsApp</p>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 20px;">$1.10 por mensaje</p>
+                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 25px;">$5,500 <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);">MXN</span></div>
+                    <button class="btn btn-primary btn-full btn-buy-package" data-package="plus" data-price="550000" data-messages="5000" style="background: var(--gradient-main);">Comprar Ahora</button>
+                </div>
+
+                <!-- Paquete Premium -->
+                <div class="dash-card" style="text-align: center;">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 15px; color: var(--text-primary);">Paquete Premium</h3>
+                    <div class="value" style="font-size: 2.5rem; color: #a855f7;">15,000</div>
+                    <p style="color: var(--text-secondary); margin-bottom: 5px;">Mensajes de WhatsApp</p>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 20px;">$1.00 por mensaje</p>
+                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 25px;">$15,000 <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);">MXN</span></div>
+                    <button class="btn btn-primary btn-full btn-buy-package" data-package="premium" data-price="1500000" data-messages="15000" style="background: rgba(168, 85, 247, 0.1); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3);">Comprar Ahora</button>
+                </div>
+            </div>
+
+            <!-- Recarga Personalizada -->
+            <div class="dash-card" style="margin-top: 28px; padding: 28px; display: flex; align-items: center; gap: 32px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 220px;">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 6px;">✏️ Recarga Personalizada</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">¿Necesitas una cantidad exacta? Elige cuántos mensajes quieres. Mínimo 500. Precio: <strong style="color: var(--accent-cyan);">$1.30 MXN</strong> por mensaje.</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px;">Cantidad de mensajes</label>
+                        <input type="number" id="custom-messages-input" min="500" step="1" placeholder="Ej. 750" style="width: 160px; padding: 10px 14px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 1rem;">
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px;">Total a pagar</div>
+                        <div id="custom-price-display" style="font-size: 1.6rem; font-weight: bold; color: var(--accent-cyan);">$0.00 MXN</div>
+                    </div>
+                    <button class="btn btn-primary" id="btn-buy-custom" disabled style="padding: 12px 24px; white-space: nowrap;">Comprar Ahora</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+                <p>🔒 Pagos 100% seguros procesados por Stripe. Los mensajes no tienen fecha de caducidad.</p>
+            </div>
+        </div> <!-- End Section Recargar Saldo -->
+
     </main>
+
+    <!-- Stripe SDK -->
+    <script src="https://js.stripe.com/v3/"></script>
 
     <!-- Excel Parser Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -529,6 +614,30 @@
     <script src="campaigns.js"></script>
     <script src="templates.js"></script>
     <script src="whatsapp-auth.js"></script>
+    <script src="payments.js"></script>
+
+    <!-- Modal Formulario de Contacto -->
+    <div id="contact-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title" style="margin-bottom: 20px;">Nuevo Contacto</h2>
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Nombre</label>
+                <input type="text" id="contact-name" placeholder="Ej. Juan Pérez" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary);">
+            </div>
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Teléfono (con código de país)</label>
+                <input type="text" id="contact-phone" placeholder="Ej. 525512345678" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary);">
+            </div>
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Etiqueta / Segmento</label>
+                <input type="text" id="contact-label" placeholder="Ej. VIP, Equipo, Zona Sur" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border-color); color: var(--text-primary);">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-ghost" id="btn-cancel-contact">Cancelar</button>
+                <button class="btn btn-primary" id="btn-save-contact">Guardar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Facebook SDK for Embedded Signup -->
     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/es_LA/sdk.js"></script>

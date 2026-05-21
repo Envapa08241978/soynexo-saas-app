@@ -95,11 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const navContactos = document.getElementById('nav-contactos');
     const navCampanas = document.getElementById('nav-campanas');
     const navPlantillas = document.getElementById('nav-plantillas');
+    const navRecargar = document.getElementById('nav-recargar');
     
     const sectionInicio = document.getElementById('section-inicio');
     const sectionContactos = document.getElementById('section-contactos');
     const sectionCampanas = document.getElementById('section-campanas');
     const sectionPlantillas = document.getElementById('section-plantillas');
+    const sectionRecargar = document.getElementById('section-recargar');
 
     function switchTab(tab) {
         if (!navInicio || !navContactos || !navCampanas || !navPlantillas) return;
@@ -107,11 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
         navContactos.classList.remove('active');
         navCampanas.classList.remove('active');
         navPlantillas.classList.remove('active');
+        if(navRecargar) navRecargar.classList.remove('active');
         
         sectionInicio.style.display = 'none';
         sectionContactos.style.display = 'none';
         if(sectionCampanas) sectionCampanas.style.display = 'none';
         if(sectionPlantillas) sectionPlantillas.style.display = 'none';
+        if(sectionRecargar) sectionRecargar.style.display = 'none';
 
         if (tab === 'inicio') {
             navInicio.classList.add('active');
@@ -131,6 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Notificar que se abrió la pestaña (para cargar plantillas si es necesario)
             window.dispatchEvent(new Event('plantillas-tab-active'));
+        } else if (tab === 'recargar') {
+            if(navRecargar) navRecargar.classList.add('active');
+            if(sectionRecargar) sectionRecargar.style.display = 'block';
         }
     }
 
@@ -138,5 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navContactos) navContactos.addEventListener('click', (e) => { e.preventDefault(); switchTab('contactos'); });
     if (navCampanas) navCampanas.addEventListener('click', (e) => { e.preventDefault(); switchTab('campanas'); });
     if (navPlantillas) navPlantillas.addEventListener('click', (e) => { e.preventDefault(); switchTab('plantillas'); });
+    if (navRecargar) navRecargar.addEventListener('click', (e) => { e.preventDefault(); switchTab('recargar'); });
 
 });

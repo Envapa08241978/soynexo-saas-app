@@ -17,7 +17,15 @@
     <meta property="og:locale" content="es_MX">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="apple-touch-icon" href="/logo.png">
+
+    <!-- Open Graph (para Google y redes sociales) -->
+    <meta property="og:image" content="https://www.soynexo.com/logo.png">
+    <meta property="og:image:width" content="1024">
+    <meta property="og:image:height" content="1024">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:image" content="https://www.soynexo.com/logo.png">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +39,7 @@
     <nav class="navbar" id="navbar">
         <div class="container nav-container">
             <a href="#inicio" class="nav-logo" id="nav-logo">
-                <span class="logo-icon">⬡</span>
+                <img src="/logo.png" alt="Soy Nexo" style="height: 36px; width: 36px; border-radius: 8px; object-fit: cover;">
                 <span class="logo-text">SOY NEXO</span>
             </a>
             <ul class="nav-links" id="nav-links">
@@ -39,8 +47,12 @@
                 <li><a href="#servicios" class="nav-link">Servicios</a></li>
                 <li><a href="#como-funciona" class="nav-link">¿Cómo funciona?</a></li>
                 <li><a href="#nosotros" class="nav-link">Nosotros</a></li>
-                <li><a href="#contacto" class="nav-link nav-cta">Contacto</a></li>
+                <li><a href="#contacto" class="nav-link">Contacto</a></li>
             </ul>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a href="/app/login.html?mode=login" class="btn btn-ghost" style="padding: 8px 18px; font-size: 0.9rem;">Iniciar Sesión</a>
+                <a href="/app/login.html?mode=register" class="btn btn-primary" style="padding: 8px 18px; font-size: 0.9rem;">Crear Cuenta</a>
+            </div>
             <button class="nav-toggle" id="nav-toggle" aria-label="Menú de navegación">
                 <span></span><span></span><span></span>
             </button>
@@ -69,12 +81,12 @@
                     Tu comunicación, potenciada con tecnología.
                 </p>
                 <div class="hero-actions">
-                    <a href="#contacto" class="btn btn-primary" id="hero-cta">
-                        <span>Solicitar demo</span>
+                    <a href="/app/login.html?mode=register" class="btn btn-primary" id="hero-cta">
+                        <span>Crear cuenta gratis</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </a>
-                    <a href="#servicios" class="btn btn-ghost" id="hero-secondary">
-                        Ver servicios
+                    <a href="/app/login.html?mode=login" class="btn btn-ghost" id="hero-secondary">
+                        Iniciar Sesión
                     </a>
                 </div>
                 <div class="hero-stats">

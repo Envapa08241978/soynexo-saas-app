@@ -4,7 +4,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const contactsEmpty = document.getElementById('contacts-empty');
     const contactsTableContainer = document.getElementById('contacts-table-container');
     const btnDeleteAll = document.getElementById('btn-delete-all');
+    
+    // Modal elements
+    const btnAddContact = document.getElementById('btn-add-contact');
+    const contactModal = document.getElementById('contact-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const contactNameInput = document.getElementById('contact-name');
+    const contactPhoneInput = document.getElementById('contact-phone');
+    const contactLabelInput = document.getElementById('contact-label');
+    const btnCancelContact = document.getElementById('btn-cancel-contact');
+    const btnSaveContact = document.getElementById('btn-save-contact');
+    
     let currentUser = null;
+    let editingContactId = null;
 
     // Escuchar autenticación para saber de quién son los contactos
     auth.onAuthStateChanged((user) => {
@@ -44,6 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; color: var(--text-secondary);">
                             ${contact.label || 'General'}
                         </span>
+                    </td>
+                    <td style="padding: 16px; text-align: right;">
+                        <button class="btn btn-ghost btn-sm btn-edit" data-id="${doc.id}" data-name="${contact.name || ''}" data-phone="${contact.phone || ''}" data-label="${contact.label || ''}" style="color: var(--accent-blue); border-color: rgba(59, 130, 246, 0.3); margin-right: 8px;">✏️</button>
+                        <button class="btn btn-ghost btn-sm btn-delete-single" data-id="${doc.id}" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">🗑️</button>
                     </td>
                 `;
                 contactsList.appendChild(tr);
@@ -198,5 +214,103 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if(btnDownloadTemplate) btnDownloadTemplate.addEventListener('click', downloadTemplate);
     if(linkDownloadTemplate) linkDownloadTemplate.addEventListener('click', downloadTemplate);
+
+    // Modal Logic
+    function openModal(isEdit, data = {}) {
+        modalTitle.innerText = isEdit ? 'Editar Contacto' : 'Nuevo Contacto';
+        contactNameInput.value = data.name || '';
+        contactPhoneInput.value = data.phone || '';
+        contactLabelInput.value = data.label || '';
+        editingContactId = data.id || null;
+        contactModal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        contactModal.style.display = 'none';
+        contactNameInput.value = '';
+        contactPhoneInput.value = '';
+        contactLabelInput.value = '';
+        editingContactId = null;
+    }
+
+    if (btnAddContact) {
+        btnAddContact.addEventListener('click', () => {
+            openModal(false);
+        });
+    }
+
+    if (btnCancelContact) {
+        btnCancelContact.addEventListener('click', closeModal);
+    }
+
+    if (btnSaveContact) {
+        btnSaveContact.addEventListener('click', async () => {
+            if (!currentUser) return;
+            const name = contactNameInput.value.trim() || 'Sin Nombre';
+            const rawPhone = contactPhoneInput.value.trim();
+            const label = contactLabelInput.value.trim() || 'General';
+            
+            const cleanPhone = rawPhone.replace(/\D/g, '');
+            if (cleanPhone.length < 10) {
+                alert("Por favor ingresa un número de teléfono válido (mínimo 10 dígitos).");
+                return;
+            }
+
+            const btnOriginalText = btnSaveContact.innerText;
+            btnSaveContact.innerText = 'Guardando...';
+            btnSaveContact.disabled = true;
+
+            try {
+                const contactsRef = db.collection('users').doc(currentUser.uid).collection('contacts');
+                if (editingContactId) {
+                    await contactsRef.doc(editingContactId).update({
+                        name: name,
+                        phone: cleanPhone,
+                        label: label
+                    });
+                } else {
+                    await contactsRef.add({
+                        name: name,
+                        phone: cleanPhone,
+                        label: label,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                closeModal();
+            } catch (err) {
+                console.error("Error guardando contacto:", err);
+                alert("Error al guardar el contacto.");
+            } finally {
+                btnSaveContact.innerText = btnOriginalText;
+                btnSaveContact.disabled = false;
+            }
+        });
+    }
+
+    // Event Delegation for Edit and Delete single buttons
+    contactsList.addEventListener('click', async (e) => {
+        const target = e.target.closest('button');
+        if (!target) return;
+
+        const id = target.getAttribute('data-id');
+        if (!id) return;
+        
+        if (target.classList.contains('btn-edit')) {
+            const name = target.getAttribute('data-name');
+            const phone = target.getAttribute('data-phone');
+            const label = target.getAttribute('data-label');
+            openModal(true, { id, name, phone, label });
+        } else if (target.classList.contains('btn-delete-single')) {
+            const confirmar = confirm("¿Estás seguro de que deseas eliminar este contacto?");
+            if (confirmar && currentUser) {
+                try {
+                    await db.collection('users').doc(currentUser.uid).collection('contacts').doc(id).delete();
+                } catch (err) {
+                    console.error("Error eliminando contacto:", err);
+                    alert("Error al eliminar el contacto.");
+                }
+            }
+        }
+    });
 
 });

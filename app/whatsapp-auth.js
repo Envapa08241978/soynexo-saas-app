@@ -49,6 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = auth.currentUser;
         if (!user) return;
 
+        // Mostrar estado de carga en el banner
+        const banner = document.getElementById('wa-status-banner');
+        if (banner) {
+            banner.innerHTML = `
+                <div class="status-dot" style="background: #f59e0b; animation: pulse 1s infinite;"></div>
+                <div>
+                    <strong style="display: block; font-size: 0.85rem;">Conectando WhatsApp...</strong>
+                    <span style="font-size: 0.75rem;">Verificando con Meta</span>
+                </div>
+            `;
+        }
+
         console.log("Enviando código al backend de Vercel...");
         
         try {
@@ -69,22 +81,50 @@ document.addEventListener('DOMContentLoaded', () => {
             
             console.log("Token obtenido exitosamente:", result);
             
-            // Guardamos los datos en Firestore desde el cliente
+            // Guardamos todos los datos en Firestore
             const wabaData = {
                 whatsappConnected: true,
                 metaSystemToken: result.accessToken,
                 wabaId: result.wabaId || 'No disponible',
+                phoneNumberId: result.phoneNumberId || 'No disponible',
+                phoneNumber: result.phoneNumber || 'No disponible',
                 connectedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             await db.collection('users').doc(user.uid).update(wabaData);
             
-            console.log("Datos guardados en Firestore correctamente.");
-            alert("¡WhatsApp conectado con éxito!");
+            console.log("✅ Datos guardados en Firestore:", wabaData);
+
+            // Actualizar el banner del dashboard
+            if (banner) {
+                banner.classList.add('connected');
+                const displayNumber = result.phoneNumber || '+52 ***';
+                banner.innerHTML = `
+                    <div class="status-dot"></div>
+                    <div>
+                        <strong style="display: block; font-size: 0.85rem;">WhatsApp Conectado</strong>
+                        <span style="font-size: 0.75rem;">${displayNumber}</span>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" style="margin-left: 10px;">Configurar</button>
+                `;
+            }
+
+            alert("✅ ¡WhatsApp conectado con éxito!\n\nNúmero: " + (result.phoneNumber || 'Registrado') + "\nWABA ID: " + (result.wabaId || 'Guardado'));
             
         } catch (error) {
             console.error("Error al intercambiar código con Meta:", error);
-            alert("Hubo un error al conectar WhatsApp. Revisa la consola.");
+            // Restaurar el banner si hay error
+            if (banner) {
+                banner.innerHTML = `
+                    <div class="status-dot"></div>
+                    <div>
+                        <strong style="display: block; font-size: 0.85rem;">WhatsApp Desconectado</strong>
+                        <span style="font-size: 0.75rem;">Error al conectar — intenta de nuevo</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm" style="margin-left: 10px;" id="btn-connect-wa">Reintentar</button>
+                `;
+            }
+            alert("Hubo un error al conectar WhatsApp: " + error.message);
         }
     }
 });

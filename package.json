@@ -1,0 +1,10 @@
+{
+  "name": "soynexo-saas-app",
+  "version": "1.0.0",
+  "description": "Soy Nexo Vercel API",
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "stripe": "^15.6.0"
+  }
+}
